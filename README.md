@@ -58,7 +58,7 @@ pip install requests
 Create a `config.env` file in the project root with the following keys:
 
 ```
-ISE_HOST=172.16.0.150
+ISE_HOST=192.168.0.100
 ISE_PORT=9060
 ISE_USERNAME=your_username
 ISE_PASSWORD=your_password

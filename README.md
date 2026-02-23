@@ -30,9 +30,12 @@ A lightweight toolkit for querying Cisco ISE network devices and SSHing into the
 
 ```mermaid
 flowchart TD
-    A([Cisco ISE\nERS API]) -->|ise_fetch.py\npaginated REST calls| B[(data/ise_raw.json)]
+    A([Cisco ISE
+        ERS API]) -->|ise_fetch.py
+        paginated REST calls| B[(data/ise_raw.json)]
     B -->|export_devices_csv.py| C[(data/data_YYYYMMDD_HHMMSS.csv)]
-    C -->|re_search.py\nloads latest CSV| D[Interactive Search Prompt]
+    C -->|re_search.py
+        loads latest CSV| D[Interactive Search Prompt]
     D -->|multiple matches| E[Print matching devices]
     D -->|single match| F([SSH into device])
     D -->|/sync command| G[Re-fetch + reload]

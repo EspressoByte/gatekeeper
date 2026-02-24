@@ -312,7 +312,7 @@ def main():
                                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                                 log_file = os.path.join(state['log_dir'], f"{match[0]}_{timestamp}.log")
                                 print(f"Logging session to {log_file}")
-                                subprocess.run(["script", "-q", log_file, "ssh", f"{state['username']}@{match[1]}"])
+                                subprocess.run(["script", "-q", "-c", f"ssh {state['username']}@{match[1]}", log_file])
                                 os.chown(log_file, state['uid'], state['gid'])
                             else:
                                 subprocess.run(["ssh", f"{state['username']}@{match[1]}"])

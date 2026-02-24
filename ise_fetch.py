@@ -4,10 +4,11 @@ ise_fetch.py
 
 Connects to the Cisco ISE ERS (External RESTful Services) API, retrieves
 every network device and its full detail record, then writes the raw data
-to data/ise_raw.json for further processing.
+to /opt/secret/data/ise_raw.json for further processing.
 
-Credentials are loaded from config.env (gitignored). Copy config.env.example
-to config.env and fill in your values before running.
+Credentials are loaded from /opt/secret/config.env (gitignored). Copy
+docs/config.env.example to /opt/secret/config.env and fill in your values
+before running.
 """
 
 import json
@@ -18,7 +19,7 @@ import requests
 import urllib3
 
 
-def _load_env(path="config.env"):
+def _load_env(path="/opt/secret/config.env"):
     if not os.path.exists(path):
         return
     with open(path) as f:
@@ -36,7 +37,7 @@ ISE_PORT    = int(os.environ.get("ISE_PORT", "9060"))
 USERNAME    = os.environ.get("ISE_USERNAME", "")
 PASSWORD    = os.environ.get("ISE_PASSWORD", "")
 VERIFY_SSL  = os.environ.get("VERIFY_SSL",  "false").lower() == "true"
-OUTPUT_FILE = "data/ise_raw.json"
+OUTPUT_FILE = "/opt/secret/data/ise_raw.json"
 PAGE_SIZE   = 100
 RETRY_DELAY = 2
 MAX_RETRIES = 3

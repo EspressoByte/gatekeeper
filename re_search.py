@@ -5,18 +5,25 @@ import io
 import sys
 import glob
 import getpass
+import pwd
 import subprocess
 import os
 import readline
 from datetime import datetime
 
-DATA_DIR = 'data'
-LOG_DIR = os.path.join(os.path.expanduser("~"), "session_logs")
+DATA_DIR = '/opt/secret/data'
 
 
-def get_current_username():
+def get_user_info():
     try:
-        return getpass.getuser()
+        username = sys.argv[1] if len(sys.argv) > 1 else getpass.getuser()
+        pw = pwd.getpwnam(username)
+        return {
+            'username': pw.pw_name,
+            'home':     pw.pw_dir,
+            'uid':      pw.pw_uid,
+            'gid':      pw.pw_gid,
+        }
     except Exception as e:
         print(f"Error: {e}")
         return None
@@ -107,9 +114,9 @@ def search_lines(lines, patterns):
 
 def run_sync(state):
     try:
-        subprocess.run(["python3", "ise_fetch.py"], check=True, timeout=300)
+        subprocess.run(["python3", "/opt/secret/ise_fetch.py"], check=True, timeout=300)
         print("\nFormatting data...")
-        subprocess.run(["python3", "export_devices_csv.py"], check=True, timeout=60,
+        subprocess.run(["python3", "/opt/secret/export_devices_csv.py"], check=True, timeout=60,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         new_file = find_latest_csv()
         if new_file and new_file != state['file_path']:
@@ -220,17 +227,23 @@ def setup_completer(state):
 
 
 def main():
+    user_info = get_user_info()
+    if not user_info:
+        print("Unable to determine the current user.")
+        sys.exit(1)
+
+    LOG_DIR = os.path.join(user_info['home'], "session_logs")
+
     state = {
-        'username': get_current_username(),
+        'username': user_info['username'],
+        'uid':      user_info['uid'],
+        'gid':      user_info['gid'],
+        'log_dir':  LOG_DIR,
         'file_path': None,
         'lines': [],
         'log_enabled': False,
         'ping_mode': False,
     }
-
-    if not state['username']:
-        print("Unable to determine the current username.")
-        sys.exit(1)
 
     os.makedirs(DATA_DIR, exist_ok=True)
     state['file_path'] = find_latest_csv()
@@ -291,11 +304,13 @@ def main():
                         print("CONNECTING...", match[1])
                         try:
                             if state['log_enabled']:
-                                os.makedirs(LOG_DIR, exist_ok=True)
+                                os.makedirs(state['log_dir'], exist_ok=True)
+                                os.chown(state['log_dir'], state['uid'], state['gid'])
                                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                                log_file = os.path.join(LOG_DIR, f"{match[0]}_{timestamp}.log")
+                                log_file = os.path.join(state['log_dir'], f"{match[0]}_{timestamp}.log")
                                 print(f"Logging session to {log_file}")
                                 subprocess.run(["script", "-q", log_file, "ssh", f"{state['username']}@{match[1]}"])
+                                os.chown(log_file, state['uid'], state['gid'])
                             else:
                                 subprocess.run(["ssh", f"{state['username']}@{match[1]}"])
                         except KeyboardInterrupt:

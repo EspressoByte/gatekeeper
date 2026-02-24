@@ -274,6 +274,9 @@ def main():
         if user_input.lower() in ('exit', 'quit'):
             break
 
+        if not user_input.strip():
+            continue
+
         if user_input.startswith('/'):
             handle_command(user_input, state)
             continue

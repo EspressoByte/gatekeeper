@@ -19,8 +19,8 @@ import json
 import os
 from datetime import datetime
 
-RAW_FILE   = "data/ise_raw.json"
-OUTPUT_DIR = "data"
+RAW_FILE   = "/opt/secret/data/ise_raw.json"
+OUTPUT_DIR = "/opt/secret/data"
 DELETE_RAW_FILE = True  # Set False to retain ise_raw.json for troubleshooting
 
 
